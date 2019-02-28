@@ -1,0 +1,22 @@
+{
+  "name": "typescripttools",
+  "version": "1.0.0",
+  "description": "Some tools to help my TypeScript projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garciaguimeras/TypeScriptTools.git"
+  },
+  "author": "Noel <garcia.guimeras@gmail.com>",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/garciaguimeras/TypeScriptTools/issues"
+  },
+  "homepage": "https://github.com/garciaguimeras/TypeScriptTools#readme",
+  "dependencies": {
+    "typescript": "^3.3.3333"
+  }
+}
