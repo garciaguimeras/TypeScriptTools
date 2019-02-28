@@ -39,6 +39,12 @@ function DatePickerOutletTransformFunctionGenerator(options: DatePickerOptions):
     return DatePickerOutletTransformFunction;
 }
 
+function Select2OutletTransformFunction(target: Element): JQuery {
+    let jqTarget = $(target);
+    jqTarget.select2();
+    return jqTarget;
+}
+
 function JQueryOutlet(): any {
     return function (target: any, name: string) {
         $glue.newOutletTransformFunction(target, name, JQueryOutletTransformFunction);
@@ -51,4 +57,10 @@ function DatePickerOutlet(options: DatePickerOptions): any {
     };
 }
 
-export { JQueryOutlet, DatePickerOutlet, DatePickerOptions };
+function Select2Outlet(): any {
+    return function (target: any, name: string) {
+        $glue.newOutletTransformFunction(target, name, Select2OutletTransformFunction);
+    }
+}
+
+export { JQueryOutlet, DatePickerOutlet, DatePickerOptions, Select2Outlet };
