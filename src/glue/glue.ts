@@ -346,4 +346,13 @@ function Controller(id: string): any {
 
 let $glue = new Glue();
 
-export { $glue, ControllerDecl, OutletTransformFunction, Outlet, Action, Inject, LoadMethod, Controller };
+export { 
+    $glue, 
+    ControllerDecl, 
+    OutletTransformFunction, 
+    Outlet, 
+    Action, 
+    Inject, 
+    LoadMethod, 
+    Controller 
+};

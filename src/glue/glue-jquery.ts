@@ -1,12 +1,14 @@
 ﻿import { $glue, OutletTransformFunction } from './glue';
 
+type BeforeShowDayResult = [boolean, string];
+
 interface DatePickerOptions {
     date?: Date,
     minDate?: Date,
     maxDate?: Date,
     dateFormat?: string
     onSelect?: (d: Date) => void,
-    beforeShowDay?: (d: Date) => Array<any>
+    beforeShowDay?: (d: Date) => BeforeShowDayResult
 }
 
 let JQueryOutletTransformFunction: OutletTransformFunction = function (target: Element): JQuery {
@@ -61,4 +63,10 @@ function Select2Outlet(): any {
     }
 }
 
-export { JQueryOutlet, DatePickerOutlet, DatePickerOptions, Select2Outlet };
+export { 
+    JQueryOutlet, 
+    DatePickerOutlet, 
+    DatePickerOptions, 
+    BeforeShowDayResult, 
+    Select2Outlet 
+};

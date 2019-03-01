@@ -47,4 +47,7 @@ class GlueMethods {
 
 }
 
-export { GlueMethods, GlueDOMTemplate };
+export { 
+    GlueMethods, 
+    GlueDOMTemplate 
+};
