@@ -19,7 +19,7 @@ class GlueMethods {
         };
     }
 
-    static cloneControllerIntoParent(template: GlueDOMTemplate, clazz: any) {
+    static cloneControllerIntoParent(template: GlueDOMTemplate, clazz: any): any {
         let list = $glue.getControllers(clazz);
         if (list.length == 0)
             return;
@@ -33,6 +33,7 @@ class GlueMethods {
             controller.element.parentElement.appendChild(elem);
 
         let newController = $glue.newController(clonedName, controller.clazz);
+        return newController ? newController.instance : null;
     }
 
     static removeController(name: string) {
@@ -47,7 +48,4 @@ class GlueMethods {
 
 }
 
-export { 
-    GlueMethods, 
-    GlueDOMTemplate 
-};
+export { GlueMethods, GlueDOMTemplate };

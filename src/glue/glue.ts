@@ -42,18 +42,11 @@ interface StringTemplate {
     template: string;
 }
 
-enum ControllerDeclState {
-    Undefined,
-    Created,
-    Loaded
-}
-
 interface ControllerDecl {
     name: string;
     clazz: any;
     element: Element;
     instance: any;
-    state: ControllerDeclState;
     stringTemplateNodes: Array<StringTemplate>;
 }
 
@@ -121,7 +114,6 @@ class Glue {
 
         decl.instance = Object.create(decl.clazz.prototype);
         decl.instance.constructor.apply(decl.instance, []);
-        decl.state = ControllerDeclState.Created;
     }
 
     private getMetadata(decl: ControllerDecl): Metadata {
@@ -161,7 +153,7 @@ class Glue {
             if (elements.length > 0) {
                 let elem = elements[0];
                 elem.addEventListener(a.event, () => {
-                    self.callMethod(decl, a.actionName, [elem, decl]);
+                    self.callMethod(decl, a.actionName, [elem, decl.name]);
                     self.applyChanges(decl);
                 });
             }
@@ -171,25 +163,21 @@ class Glue {
     private bindReferences(decl: ControllerDecl) {
         let self = this;
 
-        let deadRefCount = 0;
         let references = this.getMetadata(decl).references;
         references.forEach(r => {
             if (decl.instance[r.propertyName] == null) {
                 let list = self.controllers.filter(c => c.name == r.ref);
-                if (list.length == 0) {
-                    decl.instance[r.propertyName] = null;
-                    deadRefCount++;
-                }
-                else
+                if (list.length > 0) {
+                    if (!list[0].instance)
+                        self.populateController(list[0]);
                     decl.instance[r.propertyName] = list[0].instance;
+                }
             }
         });
-        if (deadRefCount == 0 && decl.state != ControllerDeclState.Loaded) {
-            this.notifyLoad(decl);
-            decl.state = ControllerDeclState.Loaded;
-        } 
+        this.notifyLoad(decl);
     }
 
+    /*
     private bindReferencesBack(decl: ControllerDecl) {
         this.controllers.forEach(c => {
             if (c.name !== decl.name) {
@@ -197,6 +185,7 @@ class Glue {
             }
         });
     }
+    */
 
     private createController(id: string, clazz: any): ControllerDecl | null {
         let elements = document.querySelectorAll('#' + id);
@@ -209,16 +198,18 @@ class Glue {
             clazz: clazz,
             element: elem,
             instance: null,
-            state: ControllerDeclState.Undefined,
             stringTemplateNodes: []
         };
+
+        return decl;
+    }
+
+    private populateController(decl: ControllerDecl) {
         this.bindController(decl);
         this.bindOutlets(decl);
         this.bindActions(decl);
         this.bindReferences(decl);
         this.applyChanges(decl);
-
-        return decl;
     }
 
     private notifyLoad(decl: ControllerDecl) {
@@ -235,6 +226,14 @@ class Glue {
     }
 
     // Public methods
+
+    bootstrap() {
+        this.controllers.forEach(decl => {
+            if (!decl.instance) {
+                this.populateController(decl);
+            }
+        });
+    }
 
     getController(name: string): ControllerDecl | null {
         let elements = this.controllers.filter(elem => elem.name == name);
@@ -268,7 +267,7 @@ class Glue {
             return null;
 
         this.controllers.push(decl);  
-        this.bindReferencesBack(decl);   
+        // this.bindReferencesBack(decl);   
         return decl;   
     }
 
@@ -348,7 +347,6 @@ let $glue = new Glue();
 
 export { 
     $glue, 
-    ControllerDecl, 
     OutletTransformFunction, 
     Outlet, 
     Action, 
