@@ -136,7 +136,7 @@ GlueMethods.removeController('person-form');
 
 Include require.js on your web page:
 
-``` js
+``` html
 <script src="require.js" data-main="require-main"></script>
 ```
 
