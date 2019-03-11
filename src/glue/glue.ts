@@ -53,6 +53,7 @@ interface ControllerDecl {
 class Glue {
 
     controllers: Array<ControllerDecl> = [];
+    templates: Array<ControllerDecl> = [];
     regexp: RegExp = /\{\{\s*([\w\W\d\D]+)\s*\}\}/g;
 
     // Private methods
@@ -144,6 +145,13 @@ class Glue {
         this.bindContext(decl);
     }
 
+    private bindAttributes(decl: ControllerDecl, initAttributes: any) {
+        Object.keys(initAttributes).forEach(attrName => {
+            let attrValue = initAttributes[attrName];
+            decl.instance[attrName] = attrValue;
+        });
+    }
+
     private bindActions(decl: ControllerDecl) {
         let self = this;
 
@@ -174,25 +182,10 @@ class Glue {
                 }
             }
         });
-        this.notifyLoad(decl);
     }
 
-    /*
-    private bindReferencesBack(decl: ControllerDecl) {
-        this.controllers.forEach(c => {
-            if (c.name !== decl.name) {
-                this.bindReferences(c);
-            }
-        });
-    }
-    */
-
-    private createController(id: string, clazz: any): ControllerDecl | null {
-        let elements = document.querySelectorAll('#' + id);
-        if (elements.length == 0)
-            return null;
-
-        let elem = elements.item(0);
+    private createController(id: string, elem: Element, clazz: any): ControllerDecl {
+        elem.setAttribute('id', id);
         let decl: ControllerDecl = {
             name: id,
             clazz: clazz,
@@ -204,15 +197,27 @@ class Glue {
         return decl;
     }
 
-    private populateController(decl: ControllerDecl) {
-        this.bindController(decl);
-        this.bindOutlets(decl);
-        this.bindActions(decl);
-        this.bindReferences(decl);
-        this.applyChanges(decl);
+    private createControllerFromId(id: string, clazz: any): ControllerDecl | null {
+        let elements = document.querySelectorAll('#' + id);
+        if (elements.length == 0)
+            return null;
+
+        let elem = elements.item(0);
+        return this.createController(id, elem, clazz);
     }
 
-    private notifyLoad(decl: ControllerDecl) {
+    // Public methods
+
+    bootstrap() {
+        this.controllers.forEach(decl => {
+            if (!decl.instance) {
+                this.populateController(decl);
+                this.notifyLoad(decl);
+            }
+        });
+    }
+
+    notifyLoad(decl: ControllerDecl) {
         if (!decl)
             return;
 
@@ -223,16 +228,6 @@ class Glue {
                 decl.instance[methodName].apply(decl.instance, []);
             }
         }
-    }
-
-    // Public methods
-
-    bootstrap() {
-        this.controllers.forEach(decl => {
-            if (!decl.instance) {
-                this.populateController(decl);
-            }
-        });
     }
 
     getController(name: string): ControllerDecl | null {
@@ -262,13 +257,34 @@ class Glue {
         if (exists)
             return null;
             
-        let decl = this.createController(id, clazz);
+        let decl = this.createControllerFromId(id, clazz);
         if (!decl)
             return null;
 
         this.controllers.push(decl);  
-        // this.bindReferencesBack(decl);   
         return decl;   
+    }
+
+    populateController(decl: ControllerDecl, initAttributes?: any) {
+        this.bindController(decl);
+        this.bindOutlets(decl);
+        this.bindActions(decl);
+        this.bindReferences(decl);
+        if (initAttributes) {
+            this.bindAttributes(decl, initAttributes);
+        }
+        this.applyChanges(decl);
+    }
+
+    getTemplate(clazz: any): ControllerDecl | null {
+        let elements = this.templates.filter(elem => elem.clazz === clazz);
+        return elements.length > 0 ? elements[0] : null;
+    }
+
+    newTemplate(elem: Element, clazz: any): ControllerDecl {
+        let decl = this.createController('', elem, clazz);
+        this.templates.push(decl);
+        return decl; 
     }
 
     newMetadata(clazz: any, type: MetadataType, data: any) {
@@ -343,6 +359,12 @@ function Controller(id: string): any {
     };
 }
 
+function Template(elem: Element): any {
+    return function (target: any) {
+        $glue.newTemplate(elem, target);
+    };
+}
+
 let $glue = new Glue();
 
 export { 
@@ -352,5 +374,6 @@ export {
     Action, 
     Inject, 
     LoadMethod, 
-    Controller 
+    Controller,
+    Template
 };

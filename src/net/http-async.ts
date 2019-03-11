@@ -69,7 +69,4 @@ class HttpAsync {
 
 }
 
-export { 
-    HttpAsync, 
-    HttpAsyncRequest 
-};
+export { HttpAsync, HttpAsyncRequest };
