@@ -2,13 +2,19 @@
 
 type BeforeShowDayResult = [boolean, string];
 
+enum DatePickerLanguage {
+    EN,
+    ES
+}
+
 interface DatePickerOptions {
-    date?: Date,
-    minDate?: Date,
-    maxDate?: Date,
-    dateFormat?: string
-    onSelect?: (d: Date) => void,
-    beforeShowDay?: (d: Date) => BeforeShowDayResult
+    date?: Date;
+    minDate?: Date;
+    maxDate?: Date;
+    dateFormat?: string;
+    onSelect?: (d: Date) => void;
+    beforeShowDay?: (d: Date) => BeforeShowDayResult;
+    language: DatePickerLanguage;
 }
 
 let JQueryOutletTransformFunction: OutletTransformFunction = function (target: Element): JQuery {
@@ -16,9 +22,25 @@ let JQueryOutletTransformFunction: OutletTransformFunction = function (target: E
 }
 
 function DatePickerOutletTransformFunctionGenerator(options: DatePickerOptions): OutletTransformFunction {
+
+    let dayNamesMin = function (): string[] {
+        if (options.language == DatePickerLanguage.EN)
+            return ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        return ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
+    }
+
+    let monthNames = function (): string[] {
+        if (options.language == DatePickerLanguage.EN)
+            return ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+        return ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
+            'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    }
+
     let DatePickerOutletTransformFunction: OutletTransformFunction = function (target: Element): JQuery {
         let jqTarget = $(target);
         jqTarget.datepicker();
+
         if (options && options.dateFormat)
             jqTarget.datepicker('option', 'dateFormat', options.dateFormat);
         if (options && options.date)
@@ -31,6 +53,10 @@ function DatePickerOutletTransformFunctionGenerator(options: DatePickerOptions):
             jqTarget.datepicker('option', 'beforeShowDay', options.beforeShowDay);
         if (options && options.onSelect)
             jqTarget.datepicker('option', 'onSelect', options.onSelect);
+
+        jqTarget.datepicker('option', 'dayNamesMin', dayNamesMin());
+        jqTarget.datepicker('option', 'monthNames', monthNames());
+
         return jqTarget;
     }
     return DatePickerOutletTransformFunction;
@@ -68,5 +94,6 @@ export {
     DatePickerOutlet, 
     DatePickerOptions, 
     BeforeShowDayResult, 
+    DatePickerLanguage,
     Select2Outlet 
 };
