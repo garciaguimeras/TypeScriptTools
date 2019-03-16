@@ -2,7 +2,7 @@
 
 class React {
 
-    static createElement(tag: any, attrs: any, ...children: any): Element | null {
+    static createElement(tag: any, attrs: any, ...children: any[]): Element | null {
 
         // Custom Components will be functions
         if (typeof tag === 'function') {
