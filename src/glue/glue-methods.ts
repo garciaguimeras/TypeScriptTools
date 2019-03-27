@@ -12,7 +12,7 @@ class GlueMethods {
         $glue.removeController(name);
     }
 
-    static templateToController(templateClazz: any, id: string, parentId: string, initAttributes?: any) {
+    static templateToController(templateClazz: any, id: string, parentId: string, initAttributes?: any): any {
         let template = $glue.getTemplate(templateClazz);
         if (!template)
             return;
@@ -32,6 +32,8 @@ class GlueMethods {
             
         $glue.populateController(controller, initAttributes);
         $glue.notifyLoad(controller);
+
+        return controller.instance;
     }
 
 }
