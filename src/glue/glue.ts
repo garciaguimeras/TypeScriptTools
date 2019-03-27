@@ -212,8 +212,8 @@ class Glue {
         this.controllers.forEach(decl => {
             if (!decl.instance) {
                 this.populateController(decl);
-                this.notifyLoad(decl);
             }
+            this.notifyLoad(decl);
         });
     }
 
