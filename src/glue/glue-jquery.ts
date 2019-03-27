@@ -7,6 +7,11 @@ enum DatePickerLanguage {
     ES
 }
 
+enum DatePickerFormat {
+    EN = 'mm/dd/yy',
+    ES = 'dd/mm/yy'
+}
+
 interface DatePickerOptions {
     date?: Date;
     minDate?: Date;
@@ -21,7 +26,7 @@ let JQueryOutletTransformFunction: OutletTransformFunction = function (target: E
     return $(target);
 }
 
-function DatePickerOutletTransformFunctionGenerator(options: DatePickerOptions): OutletTransformFunction {
+function configureDatePicker(jqTarget: JQuery, options: DatePickerOptions) {
 
     let dayNamesMin = function (): string[] {
         if (options.language == DatePickerLanguage.EN)
@@ -37,26 +42,30 @@ function DatePickerOutletTransformFunctionGenerator(options: DatePickerOptions):
             'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     }
 
+    jqTarget.datepicker();
+
+    if (options && options.dateFormat)
+        jqTarget.datepicker('option', 'dateFormat', options.dateFormat);
+    if (options && options.date)
+        jqTarget.val(options.date.valueOf());
+    if (options && options.minDate)
+        jqTarget.datepicker('option', 'minDate', options.minDate);
+    if (options && options.maxDate)
+        jqTarget.datepicker('option', 'maxDate', options.maxDate);
+    if (options && options.beforeShowDay)
+        jqTarget.datepicker('option', 'beforeShowDay', options.beforeShowDay);
+    if (options && options.onSelect)
+        jqTarget.datepicker('option', 'onSelect', options.onSelect);
+
+    jqTarget.datepicker('option', 'dayNamesMin', dayNamesMin());
+    jqTarget.datepicker('option', 'monthNames', monthNames());
+}
+
+function DatePickerOutletTransformFunctionGenerator(options: DatePickerOptions): OutletTransformFunction {
+
     let DatePickerOutletTransformFunction: OutletTransformFunction = function (target: Element): JQuery {
         let jqTarget = $(target);
-        jqTarget.datepicker();
-
-        if (options && options.dateFormat)
-            jqTarget.datepicker('option', 'dateFormat', options.dateFormat);
-        if (options && options.date)
-            jqTarget.val(options.date.valueOf());
-        if (options && options.minDate)
-            jqTarget.datepicker('option', 'minDate', options.minDate);
-        if (options && options.maxDate)
-            jqTarget.datepicker('option', 'maxDate', options.maxDate);
-        if (options && options.beforeShowDay)
-            jqTarget.datepicker('option', 'beforeShowDay', options.beforeShowDay);
-        if (options && options.onSelect)
-            jqTarget.datepicker('option', 'onSelect', options.onSelect);
-
-        jqTarget.datepicker('option', 'dayNamesMin', dayNamesMin());
-        jqTarget.datepicker('option', 'monthNames', monthNames());
-
+        configureDatePicker(jqTarget, options);
         return jqTarget;
     }
     return DatePickerOutletTransformFunction;
@@ -69,6 +78,35 @@ function Select2OutletTransformFunction(target: Element): JQuery {
         minimumResultsForSearch: Infinity
     });
     return jqTarget;
+}
+
+interface SliderOptions {
+    min: number;
+    max: number;
+    values: [number, number];
+    slide?: () => void;
+    change?: () => void;
+}
+
+function configureSlider(jqTarget: JQuery, options: SliderOptions) {
+    jqTarget.slider({
+        range: true,
+        min: options.min,
+        max: options.max,
+        values: options.values,
+        slide: options.slide,
+        change: options.change
+    });
+}
+
+function SliderOutletTransformFunctionGenerator(options: SliderOptions): OutletTransformFunction {
+
+    let SliderOutletTransformFunction: OutletTransformFunction = function (target: Element): JQuery {
+        let jqTarget = $(target);
+        configureSlider(jqTarget, options);
+        return jqTarget;
+    }
+    return SliderOutletTransformFunction;
 }
 
 function JQueryOutlet(): any {
@@ -89,11 +127,22 @@ function Select2Outlet(): any {
     }
 }
 
+function SliderOutlet(options: SliderOptions): any {
+    return function (target: any, name: string) {
+        $glue.newOutletTransformFunction(target, name, SliderOutletTransformFunctionGenerator(options));
+    }
+}
+
 export { 
     JQueryOutlet, 
     DatePickerOutlet, 
     DatePickerOptions, 
     BeforeShowDayResult, 
     DatePickerLanguage,
-    Select2Outlet 
+    DatePickerFormat,
+    configureDatePicker,
+    Select2Outlet,
+    SliderOptions,
+    configureSlider,
+    SliderOutlet
 };
