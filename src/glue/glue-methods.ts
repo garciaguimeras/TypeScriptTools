@@ -2,6 +2,14 @@
 
 class GlueMethods {
 
+    static getControllerInstances(clazz: any): Array<any> {
+        return $glue.getControllers(clazz).map<any>(c => c.instance);
+    }
+
+    static getControllerCount(clazz: any): number {
+        return $glue.getControllers(clazz).length;
+    }
+
     static removeController(name: string) {
         let controller = $glue.getController(name);
         if (controller == null)
@@ -12,12 +20,16 @@ class GlueMethods {
         $glue.removeController(name);
     }
 
-    static templateToController(templateClazz: any, id: string, parentId: string, initAttributes?: any): any {
+    static templateToController(parentControllerName: string, templateClazz: any, id: string, parentId: string, initAttributes?: any): any {
+        let controller = $glue.getController(parentControllerName);
+        if (!controller)
+            return;
+
         let template = $glue.getTemplate(templateClazz);
         if (!template)
             return;
 
-        let parentElement = document.querySelector('#' + parentId);
+        let parentElement = controller.element.querySelector('#' + parentId);
         if (!parentElement)
             return;
 
@@ -26,14 +38,14 @@ class GlueMethods {
         elem.setAttribute('id', id);
         parentElement.appendChild(elem);
 
-        let controller = $glue.newController(id, template.clazz);
-        if (!controller)
+        let newController = $glue.newController(id, template.clazz);
+        if (!newController)
             return;
             
-        $glue.populateController(controller, initAttributes);
-        $glue.notifyLoad(controller);
+        $glue.populateController(newController, initAttributes);
+        $glue.notifyLoad(newController);
 
-        return controller.instance;
+        return newController.instance;
     }
 
 }
