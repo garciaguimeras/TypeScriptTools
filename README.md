@@ -111,6 +111,8 @@ class PersonFormTemplate {
     @Outlet('person-name')
     personName: Element;
 
+    someData: string;
+
     @Action('accept-button', 'click')
     onAcceptButtonClick() {
         let name = personName.getAttribute('value');
@@ -123,10 +125,25 @@ class PersonFormTemplate {
 Inject it dynamically into the DOM using **glue-methods**:
 
 ``` ts
-GlueMethods.templateToController(PersonFormTemplate, 'person-form', 'parent-div');
+GlueMethods.templateToController(parentController, PersonFormTemplate, 'person-form', 'parent-div');
 ```
 
-And remove the controller dynamically from DOM:
+or
+
+``` ts
+GlueMethods.templateToController('parent-controller-id', PersonFormTemplate, 'person-form', 'parent-div');
+```
+
+or even injecting it somo initialization data
+
+``` ts
+var params = {  
+    someData: 'some value'    
+}
+GlueMethods.templateToController(parentController, PersonFormTemplate, 'person-form', 'parent-div', params);
+```
+
+and remove the controller dynamically from DOM:
 
 ``` ts
 GlueMethods.removeController('person-form');
