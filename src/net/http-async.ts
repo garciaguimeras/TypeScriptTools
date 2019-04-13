@@ -34,8 +34,8 @@ class HttpAsync {
             xhr.open(method, finalUrl, true);
             let formData = new FormData();
             if (params) {
-                Object.keys(headers).forEach(k => {
-                    formData.append(k, headers[k]);
+                Object.keys(params).forEach(k => {
+                    formData.append(k, params[k]);
                 });
             }
             if (headers) {
@@ -52,6 +52,7 @@ class HttpAsync {
                 console.log('Sorry, there was an error making the request.');
                 reject('Sorry, there was an error making the request.');
             };
+
             xhr.send(formData);
         });
         return promise;
