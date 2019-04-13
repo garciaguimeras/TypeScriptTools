@@ -2,6 +2,8 @@
 
 type OutletTransformFunction = (target: any) => any;
 
+const $self: string = "$self";
+
 enum MetadataType {
     Outlet,
     Action,
@@ -127,10 +129,10 @@ class Glue {
     private bindContext(decl: ControllerDecl) {
         let outlets = this.getMetadata(decl).outlets;
         outlets.forEach(o => {
-            let elements = decl.element.querySelectorAll('#' + o.id);
-            if (elements.length > 0) {
-                let elem: any = elements[0];
+            let elem = (o.id == $self || o.id == decl.name) ? decl.element : decl.element.querySelector('#' + o.id);
+            if (elem) {
 
+                // Run transformation chain
                 o.transformChain.forEach(fn => {
                     elem = fn(elem);
                 });
@@ -157,9 +159,8 @@ class Glue {
 
         let actions = this.getMetadata(decl).actions;
         actions.forEach(a => {
-            let elements = decl.element.querySelectorAll('#' + a.id);
-            if (elements.length > 0) {
-                let elem = elements[0];
+            let elem = decl.element.querySelector('#' + a.id);
+            if (elem) {
                 elem.addEventListener(a.event, () => {
                     self.callMethod(decl, a.actionName, [elem, decl.name]);
                     self.applyChanges(decl);
@@ -369,6 +370,7 @@ let $glue = new Glue();
 
 export { 
     $glue, 
+    $self,
     OutletTransformFunction, 
     Outlet, 
     Action, 
