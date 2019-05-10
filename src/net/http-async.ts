@@ -45,8 +45,14 @@ class HttpAsync {
             }
             xhr.withCredentials = withCredentials;
             xhr.onload = function () {
-                var text = xhr.responseText;
-                resolve(xhr.responseText);
+                if (xhr.status == 200) {
+                    var text = xhr.responseText;
+                    resolve(xhr.responseText);
+                }
+                else {
+                    console.log('Sorry, response error ' + xhr.status + ': ' + xhr.statusText);
+                    reject(xhr.responseText);
+                }
             };
             xhr.onerror = function () {
                 console.log('Sorry, there was an error making the request.');
