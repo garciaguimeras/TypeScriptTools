@@ -4,28 +4,32 @@ const $innerHtml: string = '$innerHtml';
 
 function TextOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): string {
-        let text = target.getAttribute(attrName) || (attrName == $innerHtml) ? target.innerHTML : '';
+        let text = target.getAttribute(attrName);
+        text = text ? text : (attrName == $innerHtml) ? target.innerHTML : '';
         return text;
     };
 }
 
 function IntOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): number {
-        let text = target.getAttribute(attrName) || (attrName == $innerHtml) ? target.innerHTML : '';
+        let text = target.getAttribute(attrName);
+        text = text ? text : (attrName == $innerHtml) ? target.innerHTML : '';
         return parseInt(text);
     };
 }
 
 function FloatOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): number {
-        let text = target.getAttribute(attrName) || '';
+        let text = target.getAttribute(attrName);
+        text = text ? text : (attrName == $innerHtml) ? target.innerHTML : '';
         return parseFloat(text);
     };
 }
 
 function JsonOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): any {
-        let text = target.getAttribute(attrName) || (attrName == $innerHtml) ? target.innerHTML : '';
+        let text = target.getAttribute(attrName);
+        text = text ? text : (attrName == $innerHtml) ? target.innerHTML : '';
         let obj: any = null;
         try {
             obj = JSON.parse(text);
@@ -37,7 +41,8 @@ function JsonOutletTransformFunctionGenerator(attrName: string) {
 
 function Base64JsonOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): any {
-        let text = target.getAttribute(attrName) || (attrName == $innerHtml) ? target.innerHTML : '';
+        let text = target.getAttribute(attrName);
+        text = text ? text : (attrName == $innerHtml) ? target.innerHTML : '';
         text = atob(text);
         let obj: any = null;
         try {
