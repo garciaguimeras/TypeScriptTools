@@ -23,7 +23,7 @@ class HttpAsync {
         var withCredentials = (request && request.withCredentials) ? request.withCredentials : false;
 
         let promise = new Promise((resolve, reject) => {
-            var finalUrl = this.baseUrl + "/" + url;
+            var finalUrl = this.baseUrl + (url ? '/' + url : '');
             var xhr = new XMLHttpRequest();
             if (!xhr) {
                 console.log('CORS not supported');
