@@ -2,6 +2,12 @@
 
 const $innerHtml: string = '$innerHtml';
 
+function atobUtf8(str) {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    }).join(''))
+}
+
 function TextOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): string {
         let text = target.getAttribute(attrName);
@@ -43,7 +49,7 @@ function Base64JsonOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): any {
         let text = target.getAttribute(attrName);
         text = text ? text : (attrName == $innerHtml) ? target.innerHTML : '';
-        text = atob(text);
+        text = atobUtf8(text);
         let obj: any = null;
         try {
             obj = JSON.parse(text);
@@ -85,6 +91,7 @@ function Base64JsonOutlet(attrName: string): any {
 
 export {
     $innerHtml,
+    atobUtf8,
     TextOutlet,
     IntOutlet,
     FloatOutlet,
