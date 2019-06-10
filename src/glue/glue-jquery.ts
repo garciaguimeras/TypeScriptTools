@@ -44,8 +44,10 @@ function configureDatePicker(jqTarget: JQuery, options: DatePickerOptions) {
 
     jqTarget.datepicker();
 
-    if (options && options.dateFormat)
+    if (options && options.dateFormat) {
         jqTarget.datepicker('option', 'dateFormat', options.dateFormat);
+        jqTarget.attr('placeholder', options.dateFormat);
+    }
     if (options && options.date)
         jqTarget.val(options.date.valueOf());
     if (options && options.minDate)
@@ -71,13 +73,34 @@ function DatePickerOutletTransformFunctionGenerator(options: DatePickerOptions):
     return DatePickerOutletTransformFunction;
 }
 
-function Select2OutletTransformFunction(target: Element): JQuery {
-    let jqTarget = $(target);
+interface Select2Options {
+    placeholder?: string;
+    theme?: string;
+    onChange?: () => void;
+}
+
+function configureSelect2(jqTarget: JQuery, options: Select2Options) {
     jqTarget.select2();
     jqTarget.select2({
-        minimumResultsForSearch: Infinity
+        theme: options && options.theme ? options.theme : '',
+        placeholder: options && options.placeholder ? options.placeholder : '',
     });
-    return jqTarget;
+
+    jqTarget.on('select2:select', function (e: any) {
+        if (options && options.onChange)
+            options.onChange();
+    });
+}
+
+function Select2OutletTransformFunctionGenerator(options: Select2Options): OutletTransformFunction {
+
+    let Select2OutletTransformFunction: OutletTransformFunction = function(target: Element): JQuery {
+        let jqTarget = $(target);
+        configureSelect2(jqTarget, options);
+        return jqTarget;
+    }
+
+    return Select2OutletTransformFunction;
 }
 
 interface SliderOptions {
@@ -121,9 +144,9 @@ function DatePickerOutlet(options: DatePickerOptions): any {
     };
 }
 
-function Select2Outlet(): any {
+function Select2Outlet(options: Select2Options): any {
     return function (target: any, name: string) {
-        $glue.newOutletTransformFunction(target, name, Select2OutletTransformFunction);
+        $glue.newOutletTransformFunction(target, name, Select2OutletTransformFunctionGenerator(options));
     }
 }
 
@@ -141,6 +164,8 @@ export {
     DatePickerLanguage,
     DatePickerFormat,
     configureDatePicker,
+    Select2Options,
+    configureSelect2,
     Select2Outlet,
     SliderOptions,
     configureSlider,
