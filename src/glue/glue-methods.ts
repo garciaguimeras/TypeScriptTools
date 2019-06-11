@@ -14,6 +14,20 @@ class GlueMethods {
         return $glue.getControllers(clazz).length;
     }
 
+    static getNameFromInstance(clazz: any, instance: any): string | null {
+        let controllers = $glue.getControllers(clazz).filter(c => c.instance == instance);
+        if (controllers == null || controllers.length == 0)
+            return null;
+        return controllers[0].name;
+    }
+
+    static getInstanceFromName(clazz: any, name: string): any | null {
+        let controllers = $glue.getControllers(clazz).filter(c => c.name == name);
+        if (controllers == null || controllers.length == 0)
+            return null;
+        return controllers[0].instance;
+    }
+
     static removeController(name: string) {
         let controller = $glue.getController(name);
         if (controller == null)
