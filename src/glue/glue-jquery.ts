@@ -109,6 +109,7 @@ interface SliderOptions {
     values: [number, number];
     slide?: () => void;
     change?: () => void;
+    stop?: () => void;
 }
 
 function configureSlider(jqTarget: JQuery, options: SliderOptions) {
@@ -118,7 +119,8 @@ function configureSlider(jqTarget: JQuery, options: SliderOptions) {
         max: options.max,
         values: options.values,
         slide: options.slide,
-        change: options.change
+        change: options.change,
+        stop: options.stop
     });
 }
 
