@@ -20,13 +20,19 @@ class React {
                 if (child instanceof HTMLElement) {
                     fragments.appendChild(child);
                 }
-                else if (typeof child === 'string') {
-                    const textnode = document.createTextNode(child);
+                else if (child instanceof Array) {
+                    let childArray = child as Array<any>;
+                    childArray.forEach(elem => {
+                        fragments.appendChild(elem);
+                    });
+                }
+                else if (typeof child === 'string' || typeof child === 'number' || typeof child === 'bigint') {
+                    const textnode = document.createTextNode(child.toString());
                     fragments.appendChild(textnode);
                 }
                 else {
                     // later other things could not be HTMLElement not strings
-                    console.log('not appendable', child);
+                    console.log('not appendable', child, typeof child);
                 }
             });
 
