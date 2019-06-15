@@ -1,12 +1,7 @@
 ﻿import { $glue } from './glue';
+import { Encoding } from '../text/encoding';
 
 const $innerHtml: string = '$innerHtml';
-
-function atobUtf8(str) {
-    return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-    }).join(''))
-}
 
 function TextOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): string {
@@ -49,7 +44,7 @@ function Base64JsonOutletTransformFunctionGenerator(attrName: string) {
     return function (target: Element): any {
         let text = target.getAttribute(attrName);
         text = text ? text : (attrName == $innerHtml) ? target.innerHTML : '';
-        text = atobUtf8(text);
+        text = Encoding.atobUtf8(text);
         let obj: any = null;
         try {
             obj = JSON.parse(text);
@@ -91,7 +86,6 @@ function Base64JsonOutlet(attrName: string): any {
 
 export {
     $innerHtml,
-    atobUtf8,
     TextOutlet,
     IntOutlet,
     FloatOutlet,
