@@ -159,7 +159,7 @@ class Glue {
 
         let actions = this.getMetadata(decl).actions;
         actions.forEach(a => {
-            let elem = decl.element.querySelector('#' + a.id);
+            let elem = (a.id == $self || a.id == decl.name) ? decl.element : decl.element.querySelector('#' + a.id);
             if (elem) {
                 elem.addEventListener(a.event, () => {
                     self.callMethod(decl, a.actionName, [elem, decl.name]);
