@@ -65,12 +65,12 @@ class HttpAsync {
     }
 
     get(request: HttpAsyncRequest): Promise<any> {
-        request.method = "GET";
+        request.method = 'GET';
         return this.response(request);
     }
 
     post(request: HttpAsyncRequest): Promise<any> {
-        request.method = "POST";
+        request.method = 'POST';
         return this.response(request);
     }
 
