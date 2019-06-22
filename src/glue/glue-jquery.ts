@@ -76,6 +76,7 @@ function DatePickerOutletTransformFunctionGenerator(options: DatePickerOptions):
 interface Select2Options {
     placeholder?: string;
     theme?: string;
+    noResults?: string;
     onChange?: () => void;
 }
 
@@ -84,6 +85,11 @@ function configureSelect2(jqTarget: JQuery, options: Select2Options) {
     jqTarget.select2({
         theme: options && options.theme ? options.theme : '',
         placeholder: options && options.placeholder ? options.placeholder : '',
+        language: {
+            noResults: function () {
+                return options && options.noResults ? options.noResults : '';
+            }
+        }
     });
 
     jqTarget.on('select2:select', function (e: any) {
