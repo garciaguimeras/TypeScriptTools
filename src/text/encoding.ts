@@ -1,7 +1,7 @@
 ﻿class Encoding {
 
     static atobUtf8(encodedStr: string): string {
-        return decodeURIComponent(Array.prototype.map.call(atob(encodedStr), function (c) {
+        return decodeURIComponent(Array.prototype.map.call(atob(encodedStr), function (c: string) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
         }).join(''));
     }
