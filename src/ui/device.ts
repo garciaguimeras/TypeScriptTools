@@ -44,10 +44,10 @@ class DeviceSizeDetector {
 
     addDelegate(delegate: DeviceSizeDelegate) {
         this.delegetes.push(delegate);
-        this.onWindowResize();
+        this.onWindowResize(false);
     }
 
-    onWindowResize() {
+    onWindowResize(checkLastSize: boolean = true) {
         let width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         let size = DeviceSize.XS;
 
@@ -60,7 +60,7 @@ class DeviceSizeDetector {
         if (DeviceSize.XL <= width)
             size = DeviceSize.XL;
 
-        if (size != this.lastSize) {
+        if (!checkLastSize || size != this.lastSize) {
             this.lastSize = size;
 
             this.delegetes.forEach(d => {
