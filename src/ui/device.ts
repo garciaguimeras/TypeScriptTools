@@ -1,7 +1,7 @@
 ﻿enum DeviceSize {
-    XS = 0,
-    SM = 576,
-    MD = 768,
+    XS = 0,     // Mobile
+    SM = 576,   // Tablet 
+    MD = 768,   // Desktop
     LG = 992,
     XL = 1200
 }
@@ -14,24 +14,41 @@ interface DeviceSizeDelegate {
 
 class DeviceSizeDetector {
 
-    delegete: DeviceSizeDelegate | null = null;
+    lastSize: number;
+    delegetes: Array<DeviceSizeDelegate> = [];
 
-    start(delegete: DeviceSizeDelegate) {
-        this.delegete = delegete;
+    static detector: DeviceSizeDetector | null = null;
+
+    static instance(): DeviceSizeDetector {
+        if (this.detector == null) {
+            this.detector = new DeviceSizeDetector();
+            this.detector.start();
+        }
+
+        return this.detector;
+    }
+
+    private constructor() { }
+
+    start() {
+        this.lastSize = 0;
+        this.delegetes = [];
 
         let self = this;
         window.addEventListener('resize', function () { self.onWindowResize(); });
-
-        this.onWindowResize();
     }
 
     stop() {
-        this.delegete = null;
         window.removeEventListener('resize', function () { });
     }
 
+    addDelegate(delegate: DeviceSizeDelegate) {
+        this.delegetes.push(delegate);
+        this.onWindowResize();
+    }
+
     onWindowResize() {
-        let width = window.innerWidth;
+        let width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         let size = DeviceSize.XS;
 
         if (DeviceSize.SM <= width && width < DeviceSize.MD)
@@ -43,8 +60,13 @@ class DeviceSizeDetector {
         if (DeviceSize.XL <= width)
             size = DeviceSize.XL;
 
-        if (this.delegete)
-            this.delegete.onSizeChanged(size);
+        if (size != this.lastSize) {
+            this.lastSize = size;
+
+            this.delegetes.forEach(d => {
+                d.onSizeChanged(size);
+            });
+        }
     }
 
 }
@@ -52,5 +74,5 @@ class DeviceSizeDetector {
 export {
     DeviceSize,
     DeviceSizeDelegate,
-    DeviceSizeDetector
+    DeviceSizeDetector,
 }
