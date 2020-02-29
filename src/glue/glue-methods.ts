@@ -74,7 +74,7 @@ class GlueMethods {
         elem.setAttribute('id', id);
         parent.appendChild(elem);
 
-        let newController = $glue.newController(id, template.clazz);
+        let newController = $glue.newController(id, false, template.clazz);
         if (!newController)
             return;
           

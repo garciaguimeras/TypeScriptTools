@@ -8,7 +8,9 @@ enum MetadataType {
     Outlet,
     Action,
     Inject,
-    LoadMethod
+    LoadMethod,
+    BeforeAppLoadMethod,
+    AfterAppLoadMethod
 }
 
 interface OutletMetadata {
@@ -37,6 +39,8 @@ interface Metadata {
     actions: Array<ActionMetadata>;
     references: Array<InjectMetadata>;
     loadMethod: LoadMethodMetadata;
+    beforeAppLoadMethod: LoadMethodMetadata;
+    afterAppLoadMethod: LoadMethodMetadata;
 }
 
 interface StringTemplate {
@@ -49,6 +53,7 @@ interface ControllerDecl {
     clazz: any;
     element: Element;
     instance: any;
+    isApplication: boolean;
     stringTemplateNodes: Array<StringTemplate>;
 }
 
@@ -185,50 +190,72 @@ class Glue {
         });
     }
 
-    private createController(id: string, elem: Element, clazz: any): ControllerDecl {
+    private createController(id: string, elem: Element, isApplication: boolean, clazz: any): ControllerDecl {
         elem.setAttribute('id', id);
         let decl: ControllerDecl = {
             name: id,
             clazz: clazz,
             element: elem,
             instance: null,
+            isApplication: isApplication,
             stringTemplateNodes: []
         };
 
         return decl;
     }
 
-    private createControllerFromId(id: string, clazz: any): ControllerDecl | null {
+    private createControllerFromId(id: string, isApplication: boolean, clazz: any): ControllerDecl | null {
         let elements = document.querySelectorAll('#' + id);
         if (elements.length == 0)
             return null;
 
         let elem = elements.item(0);
-        return this.createController(id, elem, clazz);
+        return this.createController(id, elem, isApplication, clazz);
+    }
+
+    private executeLoadMethod(decl: ControllerDecl, methodMetadata: LoadMethodMetadata) {
+        if (methodMetadata && methodMetadata.methodName) {
+            let methodName = methodMetadata.methodName;
+            if (decl.instance[methodName]) {
+                decl.instance[methodName].apply(decl.instance, []);
+            }
+        }
     }
 
     // Public methods
 
     bootstrap() {
-        this.controllers.forEach(decl => {
+        // Before app load
+        let app = this.controllers.find(elem => elem.isApplication);
+        let appMetadata = app ? this.getMetadata(app) : null;
+        if (app && appMetadata) {
+            this.populateController(app);
+            this.executeLoadMethod(app, appMetadata.beforeAppLoadMethod);
+            this.executeLoadMethod(app, appMetadata.loadMethod);
+        }
+
+        // Load controllers
+        this.controllers.filter(elem => !elem.isApplication).forEach(decl => {
             if (!decl.instance) {
                 this.populateController(decl);
             }
-            this.notifyLoad(decl);
+
+            let metadata = this.getMetadata(decl);
+            this.executeLoadMethod(decl, metadata.loadMethod);
         });
+
+        // After app load
+        if (app && appMetadata) {
+            this.executeLoadMethod(app, appMetadata.afterAppLoadMethod);
+        }
     }
 
     notifyLoad(decl: ControllerDecl) {
-        if (!decl)
+        if (!decl) {
             return;
-
-        let metadata = this.getMetadata(decl);
-        if (metadata.loadMethod && metadata.loadMethod.methodName) {
-            let methodName = metadata.loadMethod.methodName;
-            if (decl.instance[methodName]) {
-                decl.instance[methodName].apply(decl.instance, []);
-            }
         }
+        let metadata = this.getMetadata(decl);
+        this.executeLoadMethod(decl, metadata.loadMethod);
     }
 
     getController(name: string): ControllerDecl | null {
@@ -253,12 +280,18 @@ class Glue {
         this.controllers = tmp;
     }
 
-    newController(id: string, clazz: any): ControllerDecl | null {
+    newController(id: string, isApplication: boolean, clazz: any): ControllerDecl | null {
         let exists = this.controllers.some(elem => elem.name == id);
         if (exists)
             return null;
-            
-        let decl = this.createControllerFromId(id, clazz);
+
+        if (isApplication) {
+            exists = this.controllers.some(elem => elem.isApplication);
+            if (exists)
+                return null;
+        }
+
+        let decl = this.createControllerFromId(id, isApplication, clazz);
         if (!decl)
             return null;
 
@@ -283,7 +316,7 @@ class Glue {
     }
 
     newTemplate(elem: Element, clazz: any): ControllerDecl {
-        let decl = this.createController('', elem, clazz);
+        let decl = this.createController('', elem, false, clazz);
         this.templates.push(decl);
         return decl; 
     }
@@ -294,7 +327,9 @@ class Glue {
                 outlets: [], 
                 actions: [], 
                 references: [], 
-                loadMethod: { methodName: '' } 
+                loadMethod: { methodName: '' },
+                beforeAppLoadMethod: { methodName: '' },
+                afterAppLoadMethod: { methodName: '' },
             } as Metadata;
         }
 
@@ -312,6 +347,14 @@ class Glue {
 
         if (type == MetadataType.LoadMethod) {
             clazz.__metadata__.loadMethod = data;
+        }
+
+        if (type == MetadataType.BeforeAppLoadMethod) {
+            clazz.__metadata__.beforeAppLoadMethod = data;
+        }
+
+        if (type == MetadataType.AfterAppLoadMethod) {
+            clazz.__metadata__.afterAppLoadMethod = data;
         }
     }
 
@@ -354,15 +397,33 @@ function LoadMethod(): any {
     };
 }
 
+function BeforeAppLoadMethod(): any {
+    return function (target: any, name: string) {
+        $glue.newMetadata(target, MetadataType.BeforeAppLoadMethod, { methodName: name });
+    };
+}
+
+function AfterAppLoadMethod(): any {
+    return function (target: any, name: string) {
+        $glue.newMetadata(target, MetadataType.AfterAppLoadMethod, { methodName: name });
+    };
+}
+
 function Controller(id: string): any {
     return function (target: any) {
-        $glue.newController(id, target);
+        $glue.newController(id, false, target);
     };
 }
 
 function Template(elem: Element): any {
     return function (target: any) {
         $glue.newTemplate(elem, target);
+    };
+}
+
+function Application(id: string): any {
+    return function (target: any) {
+        $glue.newController(id, true, target);
     };
 }
 
@@ -376,6 +437,9 @@ export {
     Action, 
     Inject, 
     LoadMethod, 
+    BeforeAppLoadMethod,
+    AfterAppLoadMethod,
     Controller,
-    Template
+    Template,
+    Application
 };

@@ -24,6 +24,20 @@ class FormValidator {
         $(parentElem).append(jqElem);
     }
 
+    clean() {
+        if (!this.element)
+            return;
+
+        let parent = this.element.parentElement;
+        if (!parent)
+            return;
+
+        let warningText = parent.querySelector('#warning-text');
+        if (warningText) {
+            warningText.remove();
+        }
+    }
+
     validate(): boolean {
         let self = this;
 
