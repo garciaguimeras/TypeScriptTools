@@ -48,8 +48,7 @@ function configureDatePicker(jqTarget: JQuery, options: DatePickerOptions) {
         jqTarget.datepicker('option', 'dateFormat', options.dateFormat);
         jqTarget.attr('placeholder', options.dateFormat);
     }
-    if (options && options.date)
-        jqTarget.val(options.date.valueOf());
+
     if (options && options.minDate)
         jqTarget.datepicker('option', 'minDate', options.minDate);
     if (options && options.maxDate)
@@ -58,7 +57,10 @@ function configureDatePicker(jqTarget: JQuery, options: DatePickerOptions) {
         jqTarget.datepicker('option', 'beforeShowDay', options.beforeShowDay);
     if (options && options.onSelect)
         jqTarget.datepicker('option', 'onSelect', options.onSelect);
-
+    if (options && options.date && options.dateFormat) {
+        let fd = $.datepicker.formatDate(options.dateFormat, options.date);
+        jqTarget.val(fd);
+    }
     jqTarget.datepicker('option', 'dayNamesMin', dayNamesMin());
     jqTarget.datepicker('option', 'monthNames', monthNames());
 }
