@@ -81,6 +81,7 @@ interface Select2Options {
     noResults?: string;
     onChange?: () => void;
     hideSearchBox?: boolean;
+    width?: string;
 }
 
 function configureSelect2(jqTarget: JQuery, options: Select2Options) {
@@ -93,7 +94,8 @@ function configureSelect2(jqTarget: JQuery, options: Select2Options) {
                 return options && options.noResults ? options.noResults : '';
             }
         },
-        minimumResultsForSearch: options && options.hideSearchBox ? -1 : 1
+        minimumResultsForSearch: options && options.hideSearchBox ? -1 : 1,
+        width: options && options.width ? options.width : 'off'
     });
 
     jqTarget.on('select2:select', function (e: any) {
